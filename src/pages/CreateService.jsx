@@ -1,9 +1,33 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext.jsx'
 import { isFirebaseConfigured } from '../firebase/config.js'
-import { createService, uploadImage } from '../firebase/services.js'
-import { normalizePhoneDigits } from '../services/whatsapp.js'
+import { createService, updateServiceImageUrl, uploadImage } from '../firebase/services.js'
 import { messageForPublishError } from '../utils/firebaseUserMessage.js'
+import { normalizePhoneDigits } from '../services/whatsapp.js'
+
+const PHONE_MIN_DIGITS = 8
+const PHONE_MAX_DIGITS = 15
+const DESCRIPTION_MAX_LENGTH = 300
+const PHONE_ERROR_MESSAGE = 'Ingresá un número válido'
+/** Límite al subir a Storage (exportaciones grandes, imágenes de IA, etc.) */
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024
+
+/**
+ * Acepta cualquier imagen: MIME `image/*` (incl. PNG/JPEG/WebP/GIF/SVG/HEIC…)
+ * y, si el navegador no informa MIME, por extensión típica.
+ */
+const IMAGE_EXT_FALLBACK =
+  /\.(jpe?g|jpe|png|gif|webp|bmp|svg|heic|heif|tif|tiff|avif|ico|jfif|jp2|jpx|psd|xcf)$/i
+
+function isAllowedImageFile(file) {
+  const t = (file?.type ?? '').trim().toLowerCase()
+  if (t.startsWith('image/')) return true
+  const name = file?.name ?? ''
+  if (IMAGE_EXT_FALLBACK.test(name)) return true
+  if (t === 'application/octet-stream' && IMAGE_EXT_FALLBACK.test(name)) return true
+  return false
+}
 
 const initialForm = {
   name: '',
@@ -22,9 +46,12 @@ export default function CreateService() {
   const [createdServiceId, setCreatedServiceId] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(null)
+  const [imageUploadWarning, setImageUploadWarning] = useState(null)
+  const [imageUploadPending, setImageUploadPending] = useState(false)
   const imageInputRef = useRef(null)
 
   const firebaseReady = isFirebaseConfigured()
+  const { user, loading: authLoading } = useAuth()
 
   useEffect(() => {
     if (!imageFile) {
@@ -47,11 +74,19 @@ export default function CreateService() {
     const next = {}
     if (!form.name.trim()) next.name = 'Completá tu nombre'
     if (!form.profession.trim()) next.profession = 'Completá la profesión u oficio'
-    if (!form.description.trim()) next.description = 'Agregá una descripción'
-    if (!form.location.trim()) next.location = 'Indicá zona o ubicación'
+
+    const descriptionTrimmed = form.description.trim()
+    if (descriptionTrimmed.length > DESCRIPTION_MAX_LENGTH) {
+      next.description = `La descripción no puede superar ${DESCRIPTION_MAX_LENGTH} caracteres.`
+    }
+
     const digits = normalizePhoneDigits(form.phone)
-    if (digits.length < 8) {
-      next.phone = 'Incluí un teléfono válido (con código de área o país)'
+    if (
+      digits.length === 0 ||
+      digits.length < PHONE_MIN_DIGITS ||
+      digits.length > PHONE_MAX_DIGITS
+    ) {
+      next.phone = PHONE_ERROR_MESSAGE
     }
     return next
   }
@@ -62,13 +97,19 @@ export default function CreateService() {
       setImageFile(null)
       return
     }
-    if (!file.type.startsWith('image/')) {
-      setErrors((prev) => ({ ...prev, image: 'Elegí un archivo de imagen' }))
+    if (!isAllowedImageFile(file)) {
+      setErrors((prev) => ({
+        ...prev,
+        image: 'Elegí un archivo de imagen (cualquier formato habitual: JPG, PNG, GIF, WebP, etc.).',
+      }))
       e.target.value = ''
       return
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setErrors((prev) => ({ ...prev, image: 'La imagen debe pesar menos de 5 MB' }))
+    if (file.size > MAX_IMAGE_BYTES) {
+      setErrors((prev) => ({
+        ...prev,
+        image: `La imagen debe pesar menos de ${MAX_IMAGE_BYTES / (1024 * 1024)} MB.`,
+      }))
       e.target.value = ''
       return
     }
@@ -78,6 +119,7 @@ export default function CreateService() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    if (submitting || authLoading) return
     const nextErrors = validate()
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
@@ -89,27 +131,48 @@ export default function CreateService() {
       return
     }
 
+    if (!user?.uid) {
+      setSubmitError(
+        'Iniciá sesión con Google (menú superior) para publicar. Así el servicio queda vinculado a tu cuenta, aparece en Mi perfil y en la búsqueda de Servicios.',
+      )
+      return
+    }
+
     setSubmitError(null)
     setSubmitting(true)
+    const fileToUpload = imageFile
     try {
-      let imageUrl = null
-      if (imageFile) {
-        imageUrl = await uploadImage(imageFile)
-      }
       const phoneDigits = normalizePhoneDigits(form.phone)
+      const descriptionTrimmed = form.description.trim()
       const id = await createService({
         name: form.name.trim(),
         profession: form.profession.trim(),
-        description: form.description.trim(),
+        description: descriptionTrimmed.slice(0, DESCRIPTION_MAX_LENGTH),
         location: form.location.trim(),
         phone: phoneDigits,
-        imageUrl,
+        imageUrl: null,
+        userId: user?.uid,
       })
+
       setCreatedServiceId(id)
       setSubmitted(true)
       setForm(initialForm)
       setImageFile(null)
+      setImageUploadWarning(null)
+      setImageUploadPending(Boolean(fileToUpload))
       if (imageInputRef.current) imageInputRef.current.value = ''
+      setSubmitting(false)
+
+      if (fileToUpload) {
+        try {
+          const imageUrl = await uploadImage(fileToUpload, { timeoutMs: 60_000 })
+          await updateServiceImageUrl(id, imageUrl)
+        } catch (uploadErr) {
+          setImageUploadWarning(messageForPublishError(uploadErr))
+        } finally {
+          setImageUploadPending(false)
+        }
+      }
     } catch (err) {
       setSubmitError(messageForPublishError(err))
     } finally {
@@ -120,6 +183,8 @@ export default function CreateService() {
   function handlePublishAnother() {
     setSubmitted(false)
     setCreatedServiceId(null)
+    setImageUploadWarning(null)
+    setImageUploadPending(false)
   }
 
   if (submitted && createdServiceId) {
@@ -133,20 +198,45 @@ export default function CreateService() {
             Servicio publicado con éxito
           </h1>
           <p className="mt-4 leading-relaxed text-neutral-600">
-            Ya podés compartir tu perfil con la comunidad o volver al listado cuando quieras.
+            Tu servicio ya está en la base de datos: lo vas a ver en <strong>Mi perfil</strong> y en{' '}
+            <strong>Servicios</strong> (búsqueda de la comunidad), ordenado por fecha de publicación.
           </p>
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+          {imageUploadPending ? (
+            <p
+              className="mt-6 rounded-2xl border border-[#2F4F6F]/20 bg-[#2F4F6F]/[0.06] px-4 py-4 text-sm leading-relaxed text-[#2F4F6F]"
+              role="status"
+              aria-live="polite"
+            >
+              Subiendo imagen… Podés seguir navegando; si falla la subida, te avisamos abajo.
+            </p>
+          ) : null}
+          {imageUploadWarning ? (
+            <p
+              className="mt-6 rounded-2xl border border-amber-200/90 bg-amber-50/95 px-4 py-4 text-sm leading-relaxed text-amber-950"
+              role="status"
+            >
+              <strong>No se pudo subir la imagen.</strong> {imageUploadWarning} Los datos del servicio
+              sí quedaron guardados: deberías verlos en Mi perfil y en Servicios (quizá sin foto).
+            </p>
+          ) : null}
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               to={`/services/${createdServiceId}`}
-              className="inline-flex min-h-[3.375rem] flex-1 items-center justify-center rounded-2xl bg-[#2F4F6F] px-6 text-center text-base font-semibold text-white shadow-md transition duration-200 hover:bg-[#263f59] hover:shadow-lg"
+              className="inline-flex min-h-[3.375rem] flex-1 items-center justify-center rounded-2xl bg-[#2F4F6F] px-6 text-center text-base font-semibold text-white shadow-md transition duration-200 hover:bg-[#263f59] hover:shadow-lg sm:min-w-[10rem]"
             >
               Ver publicación
             </Link>
             <Link
-              to="/services"
-              className="inline-flex min-h-[3.375rem] flex-1 items-center justify-center rounded-2xl border-2 border-[#2F4F6F] bg-white px-6 text-base font-semibold text-[#2F4F6F] transition duration-200 hover:bg-[#2F4F6F]/5"
+              to="/profile"
+              className="inline-flex min-h-[3.375rem] flex-1 items-center justify-center rounded-2xl border-2 border-[#2F4F6F] bg-white px-6 text-base font-semibold text-[#2F4F6F] transition duration-200 hover:bg-[#2F4F6F]/5 sm:min-w-[10rem]"
             >
-              Volver al listado
+              Ir a mi perfil
+            </Link>
+            <Link
+              to="/services"
+              className="inline-flex min-h-[3.375rem] flex-1 items-center justify-center rounded-2xl border border-neutral-300/90 bg-[#F5F2ED] px-6 text-base font-semibold text-[#2F4F6F] transition duration-200 hover:bg-[#ebe7e0] sm:min-w-[10rem]"
+            >
+              Ver en Servicios
             </Link>
           </div>
           <p className="mt-8 text-center text-sm text-neutral-500">
@@ -174,7 +264,8 @@ export default function CreateService() {
         Publicar servicio
       </h1>
       <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600">
-        Completá los datos para que la comunidad pueda encontrarte. La imagen es opcional.
+        Completá los datos para que la comunidad pueda encontrarte. Podés adjuntar cualquier imagen
+        (foto, diseño, imagen generada, etc.); es opcional.
       </p>
 
       {!firebaseReady ? (
@@ -182,6 +273,14 @@ export default function CreateService() {
           Para guardar en Firebase necesitás un archivo <code className="rounded bg-white/80 px-1">.env</code>{' '}
           (copiá <code className="rounded bg-white/80 px-1">.env.example</code>) con las credenciales
           del proyecto.
+        </p>
+      ) : null}
+
+      {firebaseReady && !authLoading && !user ? (
+        <p className="mt-8 rounded-2xl border border-[#2F4F6F]/20 bg-[#2F4F6F]/[0.06] px-5 py-4 text-sm leading-relaxed text-[#2F4F6F]">
+          <strong>Iniciá sesión con Google</strong> (menú superior) antes de publicar. Solo así el
+          servicio queda asociado a tu cuenta, aparece en <strong>Mi perfil</strong> y en la búsqueda
+          de <strong>Servicios</strong>.
         </p>
       ) : null}
 
@@ -244,7 +343,7 @@ export default function CreateService() {
 
           <div>
             <label htmlFor="create-service-description" className={labelClass}>
-              Descripción
+              Descripción <span className="font-normal text-neutral-500">(opcional)</span>
             </label>
             <textarea
               id="create-service-description"
@@ -253,8 +352,12 @@ export default function CreateService() {
               onChange={(e) => updateField('description', e.target.value)}
               className={`${inputClass} resize-y min-h-[7rem]`}
               disabled={submitting}
+              maxLength={DESCRIPTION_MAX_LENGTH}
               aria-invalid={errors.description ? 'true' : 'false'}
             />
+            <p className="mt-2 text-sm text-neutral-500">
+              Opcional. Hasta {DESCRIPTION_MAX_LENGTH} caracteres.
+            </p>
             {errors.description ? (
               <p className="mt-2 text-sm text-red-600" role="alert">
                 {errors.description}
@@ -264,7 +367,7 @@ export default function CreateService() {
 
           <div>
             <label htmlFor="create-service-location" className={labelClass}>
-              Ubicación
+              Ubicación <span className="font-normal text-neutral-500">(opcional)</span>
             </label>
             <input
               id="create-service-location"
@@ -275,13 +378,7 @@ export default function CreateService() {
               className={inputClass}
               placeholder="Barrio, ciudad o zona"
               disabled={submitting}
-              aria-invalid={errors.location ? 'true' : 'false'}
             />
-            {errors.location ? (
-              <p className="mt-2 text-sm text-red-600" role="alert">
-                {errors.location}
-              </p>
-            ) : null}
           </div>
 
           <div>
@@ -344,10 +441,16 @@ export default function CreateService() {
         <div className="mt-12">
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || (firebaseReady && (authLoading || !user))}
             className="inline-flex min-h-[3.375rem] w-full items-center justify-center rounded-2xl bg-[#2F4F6F] px-6 text-base font-semibold text-white shadow-md transition duration-200 hover:bg-[#263f59] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 sm:text-lg"
           >
-            {submitting ? 'Publicando…' : 'Publicar servicio'}
+            {submitting
+              ? 'Publicando…'
+              : firebaseReady && authLoading
+                ? 'Comprobando sesión…'
+                : firebaseReady && !user
+                  ? 'Iniciá sesión para publicar'
+                  : 'Publicar servicio'}
           </button>
         </div>
       </form>

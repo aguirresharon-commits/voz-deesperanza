@@ -34,5 +34,5 @@ export function messageForPublishError(err) {
   if (code === 'unavailable' || code === 'deadline-exceeded') {
     return 'La publicación tardó demasiado. Verificá tu conexión e intentá nuevamente.'
   }
-  return 'No pudimos publicar tu servicio. Intentá nuevamente en unos minutos.'
+  return 'Hubo un problema al publicar. Intentá nuevamente.'
 }

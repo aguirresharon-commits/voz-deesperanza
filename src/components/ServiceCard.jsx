@@ -15,6 +15,7 @@ export default function ServiceCard({
   whatsappMessage = defaultWaText,
 }) {
   const waHref = buildWhatsAppUrl(phone, whatsappMessage)
+  const waLinkInvalid = waHref === '#'
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-neutral-200/70 bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
@@ -47,34 +48,31 @@ export default function ServiceCard({
 
         <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-neutral-600">{description}</p>
 
-        <p className="mt-6 flex items-start gap-2 text-sm text-neutral-500">
-          <span className="mt-0.5 inline-block h-3.5 w-3.5 shrink-0 rounded-full bg-[#2F4F6F]/15 ring-1 ring-[#2F4F6F]/20" aria-hidden />
-          <span>
+        <div className="mt-6 space-y-3 text-sm">
+          <p className="text-neutral-500">
             <span className="font-medium text-neutral-700">Ubicación</span>
             <span className="text-neutral-400"> · </span>
             {location}
-          </span>
-        </p>
-
-        {serviceId ? (
-          <p className="mt-5">
+          </p>
+          {serviceId ? (
             <Link
               to={`/services/${serviceId}`}
-              className="text-sm font-semibold text-[#2F4F6F] underline-offset-4 transition duration-200 hover:underline"
+              className="inline-block font-semibold text-[#2F4F6F] underline-offset-4 transition duration-200 hover:underline"
             >
               Ver detalle
             </Link>
-          </p>
-        ) : null}
+          ) : null}
+        </div>
 
         <div className="mt-8 flex flex-1 flex-col justify-end">
           <a
             href={waHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-[3.125rem] w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 text-sm font-semibold text-white shadow-sm shadow-[#25D366]/25 transition duration-200 hover:bg-[#20bd5a] hover:shadow-md"
+            target={waLinkInvalid ? undefined : '_blank'}
+            rel={waLinkInvalid ? undefined : 'noopener noreferrer'}
+            onClick={waLinkInvalid ? (e) => e.preventDefault() : undefined}
+            className="inline-flex min-h-[3.125rem] w-full items-center justify-center gap-2 rounded-2xl border border-[#b8e8cc] bg-white px-4 text-sm font-semibold text-neutral-800 shadow-sm transition duration-200 hover:border-[#9ddbb8] hover:bg-[#f7fdf9]"
           >
-            <WhatsAppIcon className="h-5 w-5 shrink-0" />
+            <WhatsAppIcon className="h-5 w-5 shrink-0 text-[#25D366]" />
             Contactar por WhatsApp
           </a>
         </div>

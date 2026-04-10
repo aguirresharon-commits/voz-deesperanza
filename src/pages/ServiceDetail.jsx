@@ -26,6 +26,15 @@ export default function ServiceDetail() {
       setLoading(true)
       setLoadError(null)
 
+      if (!serviceId || String(serviceId).trim() === '') {
+        if (!cancelled) {
+          setService(null)
+          setLoadError(null)
+          setLoading(false)
+        }
+        return
+      }
+
       if (useCloud) {
         try {
           const data = await getServiceById(serviceId)
@@ -101,6 +110,7 @@ export default function ServiceDetail() {
   }
 
   const waHref = buildWhatsAppUrl(service.phone, defaultWaText)
+  const waLinkInvalid = waHref === '#'
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-20">
@@ -158,11 +168,12 @@ export default function ServiceDetail() {
           <div className="mt-12">
             <a
               href={waHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-[3.5rem] w-full items-center justify-center gap-3 rounded-2xl bg-[#25D366] px-6 text-base font-semibold text-white shadow-md shadow-[#25D366]/20 transition duration-200 hover:bg-[#20bd5a] hover:shadow-lg sm:min-h-[3.75rem] sm:text-lg"
+              target={waLinkInvalid ? undefined : '_blank'}
+              rel={waLinkInvalid ? undefined : 'noopener noreferrer'}
+              onClick={waLinkInvalid ? (e) => e.preventDefault() : undefined}
+              className="inline-flex min-h-[3.5rem] w-full items-center justify-center gap-3 rounded-2xl border border-[#b8e8cc] bg-white px-6 text-base font-semibold text-neutral-800 shadow-sm transition duration-200 hover:border-[#9ddbb8] hover:bg-[#f7fdf9] sm:min-h-[3.75rem] sm:text-lg"
             >
-              <WhatsAppIcon className="h-7 w-7 shrink-0" />
+              <WhatsAppIcon className="h-7 w-7 shrink-0 text-[#25D366]" />
               Contactar por WhatsApp
             </a>
           </div>

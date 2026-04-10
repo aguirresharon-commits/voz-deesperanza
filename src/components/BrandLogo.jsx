@@ -6,7 +6,7 @@ export default function BrandLogo({ className = 'h-10 w-auto' }) {
     <img
       src="/logo.png"
       alt="Voz de Esperanza — paloma con rama de olivo"
-      className={`object-contain ${className}`.trim()}
+      className={`object-contain mix-blend-multiply ${className}`.trim()}
       loading="eager"
       decoding="async"
     />

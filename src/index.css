@@ -4,3 +4,11 @@
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
 }
+
+/* Un solo color de lienzo: evita franjas blancas/grises (navbar blur, body por defecto, #root). */
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: #f5f2ed;
+}
