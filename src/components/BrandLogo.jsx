@@ -1,14 +1,16 @@
 /**
- * Logo principal (PNG en /public/logo.png): paloma con rama de olivo.
+ * Paloma lineal (#4F6D8A) — PNG transparente en /assets/logo-paloma.png
  */
-export default function BrandLogo({ className = 'h-10 w-auto' }) {
+export default function BrandLogo({ variant = 'header', className = '' }) {
+  const variantClass = variant === 'hero' ? 'logo-hero' : 'logo-header'
   return (
     <img
-      src="/logo.png"
-      alt="Voz de Esperanza — paloma con rama de olivo"
-      className={`object-contain mix-blend-multiply ${className}`.trim()}
+      src="/assets/logo-paloma.png"
+      alt={variant === 'hero' ? 'Paloma de la paz — Voz de Esperanza' : ''}
+      className={`${variantClass} ${className}`.trim()}
       loading="eager"
       decoding="async"
+      aria-hidden={variant === 'header' ? true : undefined}
     />
   )
 }

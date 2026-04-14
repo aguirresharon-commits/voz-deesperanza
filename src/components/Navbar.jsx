@@ -107,17 +107,15 @@ export default function Navbar() {
       >
         <NavLink
           to="/"
-          className="group flex min-w-0 shrink items-center gap-3 transition-opacity duration-200 hover:opacity-90"
+          className="navbar-brand group min-w-0 shrink text-[#2F4F6F] transition-opacity duration-200 hover:opacity-90"
         >
-          <BrandLogo className="h-10 w-auto shrink-0 md:h-11" />
-          <span className="min-w-0 text-left leading-tight">
-            <span className="block truncate font-serif text-base font-semibold tracking-tight text-[#2F4F6F] md:text-lg">
+          <BrandLogo variant="header" />
+          <div className="navbar-brand-text">
+            <span className="navbar-title font-serif truncate">
               Profesionales <span className="text-[#2F4F6F]/45">×</span> Voz de Esperanza
             </span>
-            <span className="mt-0.5 hidden text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-neutral-400 sm:block">
-              Comunidad
-            </span>
-          </span>
+            <span className="navbar-brand-tagline hidden sm:block">Comunidad</span>
+          </div>
         </NavLink>
 
         <ul className="hidden items-center gap-2 md:flex md:gap-2 lg:gap-3">

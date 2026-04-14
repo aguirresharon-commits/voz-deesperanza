@@ -2,9 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { isFirebaseConfigured } from '../firebase/config.js'
-import { createService, updateServiceImageUrl, uploadImage } from '../firebase/services.js'
+import { createService, uploadImage } from '../firebase/services.js'
 import { messageForPublishError } from '../utils/firebaseUserMessage.js'
+import { withTimeout } from '../utils/withTimeout.js'
 import { normalizePhoneDigits } from '../services/whatsapp.js'
+
+/** Firestore puede quedar colgado sin rechazar si hay problemas de red; evita loading infinito */
+const CREATE_SERVICE_TIMEOUT_MS = 60_000
 
 const PHONE_MIN_DIGITS = 8
 const PHONE_MAX_DIGITS = 15
@@ -139,41 +143,55 @@ export default function CreateService() {
     }
 
     setSubmitError(null)
+    setImageUploadWarning(null)
     setSubmitting(true)
     const fileToUpload = imageFile
     try {
       const phoneDigits = normalizePhoneDigits(form.phone)
       const descriptionTrimmed = form.description.trim()
-      const id = await createService({
-        name: form.name.trim(),
-        profession: form.profession.trim(),
-        description: descriptionTrimmed.slice(0, DESCRIPTION_MAX_LENGTH),
-        location: form.location.trim(),
-        phone: phoneDigits,
-        imageUrl: null,
-        userId: user?.uid,
-      })
+
+      let imageUrl = null
+      let imageUploadError = null
+      if (fileToUpload) {
+        try {
+          imageUrl = await uploadImage(fileToUpload, { timeoutMs: 60_000 })
+        } catch (uploadErr) {
+          if (import.meta.env.DEV) {
+            console.error('[CreateService] Subida de imagen:', uploadErr)
+          }
+          imageUploadError = uploadErr
+        }
+      }
+
+      const id = await withTimeout(
+        createService({
+          name: form.name.trim(),
+          profession: form.profession.trim(),
+          description: descriptionTrimmed.slice(0, DESCRIPTION_MAX_LENGTH),
+          location: form.location.trim(),
+          phone: phoneDigits,
+          imageUrl,
+          userId: user?.uid,
+        }),
+        CREATE_SERVICE_TIMEOUT_MS,
+        'La creación del servicio tardó demasiado',
+      )
 
       setCreatedServiceId(id)
       setSubmitted(true)
       setForm(initialForm)
       setImageFile(null)
-      setImageUploadWarning(null)
-      setImageUploadPending(Boolean(fileToUpload))
-      if (imageInputRef.current) imageInputRef.current.value = ''
-      setSubmitting(false)
-
-      if (fileToUpload) {
-        try {
-          const imageUrl = await uploadImage(fileToUpload, { timeoutMs: 60_000 })
-          await updateServiceImageUrl(id, imageUrl)
-        } catch (uploadErr) {
-          setImageUploadWarning(messageForPublishError(uploadErr))
-        } finally {
-          setImageUploadPending(false)
-        }
+      setImageUploadPending(false)
+      if (fileToUpload && imageUploadError) {
+        setImageUploadWarning(messageForPublishError(imageUploadError))
+      } else {
+        setImageUploadWarning(null)
       }
+      if (imageInputRef.current) imageInputRef.current.value = ''
     } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error('[CreateService] Publicación:', err)
+      }
       setSubmitError(messageForPublishError(err))
     } finally {
       setSubmitting(false)

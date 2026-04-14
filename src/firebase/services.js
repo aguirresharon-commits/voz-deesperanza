@@ -8,13 +8,22 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  updateDoc,
   where,
 } from 'firebase/firestore'
 import { auth, db } from './config.js'
 
-const CLOUDINARY_CLOUD_NAME = 'ddzguwswh'
-const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`
+/** Host US por defecto; cuentas EU/AP deben usar api-eu.cloudinary.com / api-ap.cloudinary.com */
+const CLOUDINARY_API_HOST =
+  (import.meta.env.VITE_CLOUDINARY_API_HOST && String(import.meta.env.VITE_CLOUDINARY_API_HOST).trim()) ||
+  'api.cloudinary.com'
+const CLOUDINARY_CLOUD_NAME =
+  (import.meta.env.VITE_CLOUDINARY_CLOUD_NAME && String(import.meta.env.VITE_CLOUDINARY_CLOUD_NAME).trim()) ||
+  'ddzguwswh'
+const CLOUDINARY_UPLOAD_PRESET =
+  (import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET && String(import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET).trim()) ||
+  'voz_esperanza_upload'
+
+const CLOUDINARY_UPLOAD_URL = `https://${CLOUDINARY_API_HOST}/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`
 
 /**
  * Colección `services`: name, profession, description, location, phone, imageUrl, userId?, createdAt
@@ -109,16 +118,6 @@ export async function createService(payload) {
   return docRef.id
 }
 
-/**
- * Actualiza la URL de imagen de un servicio ya creado (tras subir la imagen).
- * @param {string} serviceId
- * @param {string} imageUrl
- */
-export async function updateServiceImageUrl(serviceId, imageUrl) {
-  if (!db) throw new Error('Firebase no está configurado')
-  await updateDoc(doc(db, 'services', String(serviceId)), { imageUrl })
-}
-
 const DEFAULT_UPLOAD_TIMEOUT_MS = 60_000
 
 /**
@@ -131,9 +130,17 @@ export async function uploadImage(file, options = {}) {
   const timeoutMs =
     typeof options.timeoutMs === 'number' ? options.timeoutMs : DEFAULT_UPLOAD_TIMEOUT_MS
 
+  if (!(file instanceof Blob) || file.size <= 0) {
+    throw new Error('Archivo de imagen inválido o vacío')
+  }
+
   const formData = new FormData()
-  formData.append('file', file)
-  formData.append('upload_preset', 'voz_esperanza_upload')
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+  const uploadName =
+    file instanceof File && file.name && String(file.name).trim()
+      ? file.name.trim()
+      : 'upload.jpg'
+  formData.append('file', file, uploadName)
 
   const controller = new AbortController()
   const timer =
@@ -148,11 +155,16 @@ export async function uploadImage(file, options = {}) {
       signal: controller.signal,
     })
 
+    const data = await res.json().catch(() => ({}))
+
     if (!res.ok) {
-      throw new Error('Error subiendo imagen')
+      const apiMsg =
+        data?.error?.message && typeof data.error.message === 'string'
+          ? data.error.message.trim()
+          : ''
+      throw new Error(apiMsg || `Error subiendo imagen (${res.status})`)
     }
 
-    const data = await res.json()
     if (!data?.secure_url) {
       throw new Error('Error subiendo imagen')
     }

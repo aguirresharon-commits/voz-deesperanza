@@ -82,19 +82,15 @@ export default function HomePage() {
       {/* Hero + bloque inferior: mismo fondo, sin cortes ni otro color */}
       <div className="mx-auto flex w-full max-w-lg flex-col items-center px-5 pb-16 pt-12 text-center sm:max-w-2xl sm:px-6 md:max-w-3xl md:pb-20 md:pt-16 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-20">
         <div className="flex w-full flex-col items-center">
-          <BrandLogo className="h-28 w-auto max-w-[200px] opacity-[0.97] sm:h-32 md:h-36" />
-          <p className="mt-5 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-[#2F4F6F]/60 md:text-[0.7rem]">
-            Profesionales <span className="font-normal text-[#2F4F6F]/35">×</span> Voz de Esperanza
-          </p>
-        </div>
-
-        <div className="mt-10 flex w-full max-w-[22rem] flex-col items-center sm:max-w-xl md:max-w-2xl md:mt-12">
-          <h1 className="font-serif text-[1.75rem] font-semibold leading-snug tracking-tight text-[#2F4F6F] sm:text-3xl md:text-4xl lg:text-[2.65rem] lg:leading-[1.2]">
-            Conectando profesionales con la comunidad
-          </h1>
-          <p className="mt-5 max-w-md text-[0.95rem] leading-relaxed text-neutral-500 md:mt-6 md:text-base">
-            Encontrá servicios de confianza dentro de nuestra comunidad
-          </p>
+          <BrandLogo variant="hero" />
+          <div className="mt-4 flex w-full max-w-[22rem] flex-col items-center sm:mt-5 sm:max-w-xl md:mt-6 md:max-w-2xl">
+            <h1 className="font-serif text-[1.75rem] font-semibold leading-snug tracking-tight text-[#2F4F6F] sm:text-3xl md:text-4xl lg:text-[2.65rem] lg:leading-[1.2]">
+              Conectando profesionales con la comunidad
+            </h1>
+            <p className="mt-5 max-w-md text-[0.95rem] leading-relaxed text-neutral-500 md:mt-6 md:text-base">
+              Encontrá servicios de confianza dentro de nuestra comunidad
+            </p>
+          </div>
         </div>
 
         <div className="mt-10 flex w-full max-w-sm flex-col gap-4 sm:mt-12 sm:max-w-none sm:flex-row sm:justify-center sm:gap-5">

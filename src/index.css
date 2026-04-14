@@ -12,3 +12,101 @@ body,
   min-height: 100%;
   background-color: #f5f2ed;
 }
+
+/* Marca: grid — logo | bloque texto (título + subtítulo en columna, alineados) */
+.navbar-brand {
+  --navbar-logo-h: 40px;
+  --navbar-brand-gap: 0.6875rem; /* 11px — entre logo y texto */
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--navbar-brand-gap);
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .navbar-brand {
+    --navbar-logo-h: 116px;
+  }
+}
+
+/* Paloma en navbar: altura = variable (40px móvil / 116px desktop) */
+.logo-header {
+  height: var(--navbar-logo-h);
+  width: auto;
+}
+
+.navbar-brand > .logo-header {
+  grid-column: 1;
+  grid-row: 1;
+  flex-shrink: 0;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  opacity: 1;
+}
+
+/* Tamaño base del bloque = título; el subtítulo escala en em para mantener proporción */
+.navbar-brand-text {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .navbar-brand-text {
+    font-size: 20px;
+  }
+}
+
+.navbar-brand .navbar-title {
+  font-size: 1em;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  min-width: 0;
+}
+
+.navbar-brand .navbar-brand-tagline {
+  font-family: var(--font-sans);
+  font-size: 0.72em;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: #6f6f6f;
+  text-align: left;
+}
+
+/* Paloma — hero: ancho objetivo ~116–130px móvil, ~160–180px desktop; separado del navbar */
+.logo-hero {
+  display: block;
+  width: min(100%, 7.25rem);
+  height: auto;
+  max-width: 100%;
+  margin-top: clamp(2.5rem, 5vw, 3.75rem);
+  object-fit: contain;
+  opacity: 0.55;
+}
+
+@media (min-width: 640px) {
+  .logo-hero {
+    width: min(100%, 8.125rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .logo-hero {
+    width: min(100%, 9.5rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .logo-hero {
+    width: min(100%, 11.125rem);
+  }
+}
