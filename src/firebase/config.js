@@ -1,6 +1,6 @@
 import { getApp, getApps, initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { getFirestore, initializeFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -24,7 +24,19 @@ const app = isFirebaseConfigured()
   : null
 
 /** `null` si faltan variables en `.env` */
-export const db = app ? getFirestore(app) : null
+export const db = (() => {
+  if (!app) return null
+  // Algunas redes (proxy/firewall) bloquean el transporte por defecto de Firestore y la app queda "colgada".
+  // Estas opciones fuerzan un transporte más compatible.
+  try {
+    return initializeFirestore(app, {
+      experimentalAutoDetectLongPolling: true,
+      useFetchStreams: false,
+    })
+  } catch {
+    return getFirestore(app)
+  }
+})()
 
 /** `null` si faltan variables en `.env` */
 export const auth = app ? getAuth(app) : null

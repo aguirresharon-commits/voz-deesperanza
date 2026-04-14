@@ -63,11 +63,11 @@ export default function ServicesPage() {
     !loading && !loadError && items.length === 0 && search.trim().length === 0
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-20">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight text-[#2F4F6F] md:text-4xl">
+    <main className="mx-auto w-full min-w-0 max-w-5xl px-4 py-10 sm:px-6 sm:py-12 md:py-16 lg:px-8 lg:py-20">
+      <h1 className="font-serif text-2xl font-semibold tracking-tight text-[#2F4F6F] sm:text-3xl md:text-4xl">
         Servicios
       </h1>
-      <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-600 md:text-lg">
+      <p className="mt-4 max-w-2xl text-sm leading-relaxed text-neutral-600 sm:text-base md:text-lg">
         Buscá por nombre, profesión, zona o palabras en la descripción. Podés entrar al detalle o
         contactar por WhatsApp desde la tarjeta.
       </p>
@@ -94,7 +94,7 @@ export default function ServicesPage() {
           placeholder="Nombre, oficio, zona…"
           autoComplete="off"
           disabled={loading && useCloud}
-          className="w-full rounded-2xl border border-neutral-200 bg-white px-5 py-3.5 text-[#2F4F6F] shadow-sm outline-none transition duration-200 placeholder:text-neutral-400 focus:border-[#2F4F6F]/45 focus:ring-2 focus:ring-[#2F4F6F]/18 disabled:opacity-60"
+          className="w-full min-w-0 rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-[#2F4F6F] shadow-sm outline-none transition duration-200 placeholder:text-neutral-400 focus:border-[#2F4F6F]/45 focus:ring-2 focus:ring-[#2F4F6F]/18 disabled:opacity-60 sm:px-5 sm:py-3.5 sm:text-base"
         />
       </div>
 

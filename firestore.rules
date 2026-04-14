@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Usuarios (perfil)
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update, delete: if signedIn() && request.auth.uid == userId;
+    }
+
+    // Servicios / publicaciones
+    match /services/{serviceId} {
+      allow read: if true;
+
+      // Requiere que el servicio quede ligado al usuario autenticado
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+
+      // Solo el dueño puede editar/borrar
+      allow update, delete: if signedIn()
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // Reseñas
+    match /reviews/{reviewId} {
+      allow read: if true;
+
+      // Cualquiera logueado puede crear, pero debe ser autor de su reseña
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid;
+
+      // Solo el autor puede editar/borrar
+      allow update, delete: if signedIn()
+        && resource.data.authorId == request.auth.uid;
+    }
+  }
+}

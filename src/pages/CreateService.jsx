@@ -207,7 +207,7 @@ export default function CreateService() {
 
   if (submitted && createdServiceId) {
     return (
-      <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6 md:py-16 lg:px-8 lg:py-20">
+      <main className="mx-auto w-full min-w-0 max-w-5xl px-4 py-14 sm:px-6 md:py-16 lg:px-8 lg:py-20">
         <div className="mx-auto max-w-2xl rounded-2xl border border-neutral-200/80 bg-white p-8 shadow-sm md:p-10">
           <p className="text-sm font-semibold uppercase tracking-wide text-[#2F4F6F]/80">
             Listo
@@ -272,16 +272,16 @@ export default function CreateService() {
   }
 
   const inputClass =
-    'w-full rounded-2xl border border-neutral-200 bg-white px-4 py-4 text-base text-[#2F4F6F] shadow-sm outline-none transition duration-200 placeholder:text-neutral-400 focus:border-[#2F4F6F]/45 focus:ring-2 focus:ring-[#2F4F6F]/18 disabled:opacity-60'
+    'w-full min-w-0 rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-[0.95rem] text-[#2F4F6F] shadow-sm outline-none transition duration-200 placeholder:text-neutral-400 focus:border-[#2F4F6F]/45 focus:ring-2 focus:ring-[#2F4F6F]/18 disabled:opacity-60 sm:py-4 sm:text-base'
   const labelClass = 'mb-2.5 block text-sm font-semibold tracking-tight text-neutral-800'
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-20">
+    <main className="mx-auto w-full min-w-0 max-w-5xl px-4 py-10 sm:px-6 sm:py-12 md:py-16 lg:px-8 lg:py-20">
       <div className="mx-auto max-w-2xl">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight text-[#2F4F6F] md:text-4xl">
+      <h1 className="font-serif text-2xl font-semibold tracking-tight text-[#2F4F6F] sm:text-3xl md:text-4xl">
         Publicar servicio
       </h1>
-      <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600">
+      <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-600 sm:text-base">
         Completá los datos para que la comunidad pueda encontrarte. Podés adjuntar cualquier imagen
         (foto, diseño, imagen generada, etc.); es opcional.
       </p>
@@ -304,7 +304,7 @@ export default function CreateService() {
 
       <form
         onSubmit={handleSubmit}
-        className="mt-10 rounded-2xl border border-neutral-200/80 bg-white p-7 shadow-sm md:p-9"
+        className="mt-10 rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-sm sm:p-7 md:p-9"
         noValidate
       >
         {submitError ? (

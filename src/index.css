@@ -5,12 +5,31 @@
   --font-serif: "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
 }
 
+/* Tipografía fluida: cómoda en móvil y un poco mayor en pantallas anchas (sin zoom forzado). */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: clamp(0.9375rem, 0.875rem + 0.35vw, 1.125rem);
+}
+
+body {
+  overflow-x: clip;
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+}
+
 /* Un solo color de lienzo: evita franjas blancas/grises (navbar blur, body por defecto, #root). */
 html,
 body,
 #root {
   min-height: 100%;
-  background-color: #f5f2ed;
+  background-color: #f7f5f2;
+}
+
+#root {
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 /* Marca: grid — logo | bloque texto (título + subtítulo en columna, alineados) */

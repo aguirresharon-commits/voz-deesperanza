@@ -18,8 +18,8 @@ export default function ServiceCard({
   const waLinkInvalid = waHref === '#'
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-neutral-200/70 bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
-      <div className="relative h-48 w-full shrink-0 bg-gradient-to-b from-neutral-100 to-neutral-50">
+    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-neutral-200/70 bg-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="relative h-40 w-full shrink-0 bg-gradient-to-b from-neutral-100 to-neutral-50 sm:h-48">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -37,18 +37,18 @@ export default function ServiceCard({
         )}
       </div>
 
-      <div className="relative flex flex-1 flex-col border-t border-[#2F4F6F]/10 px-8 pb-8 pt-7">
-        <span className="inline-flex w-fit rounded-full bg-[#2F4F6F]/[0.09] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#2F4F6F]">
+      <div className="relative flex flex-1 flex-col border-t border-[#2F4F6F]/10 px-5 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7">
+        <span className="inline-flex w-fit rounded-full bg-[#2F4F6F]/[0.09] px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#2F4F6F] sm:text-[11px]">
           {profession}
         </span>
 
-        <h2 className="mt-5 font-serif text-xl font-semibold leading-snug tracking-tight text-[#2F4F6F]">
+        <h2 className="mt-4 font-serif text-lg font-semibold leading-snug tracking-tight text-[#2F4F6F] sm:mt-5 sm:text-xl">
           {name}
         </h2>
 
-        <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-neutral-600">{description}</p>
+        <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-neutral-600 sm:mt-4">{description}</p>
 
-        <div className="mt-6 space-y-3 text-sm">
+        <div className="mt-5 space-y-3 text-sm sm:mt-6">
           <p className="text-neutral-500">
             <span className="font-medium text-neutral-700">Ubicación</span>
             <span className="text-neutral-400"> · </span>

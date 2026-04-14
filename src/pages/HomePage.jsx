@@ -78,16 +78,16 @@ export default function HomePage() {
       }))
 
   return (
-    <section className="min-h-[calc(100vh-4.25rem)] bg-[#F5F2ED]">
+    <section className="min-h-[calc(100vh-4.25rem)] w-full min-w-0 bg-[#F7F5F2]">
       {/* Hero + bloque inferior: mismo fondo, sin cortes ni otro color */}
-      <div className="mx-auto flex w-full max-w-lg flex-col items-center px-5 pb-16 pt-12 text-center sm:max-w-2xl sm:px-6 md:max-w-3xl md:pb-20 md:pt-16 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-20">
-        <div className="flex w-full flex-col items-center">
+      <div className="mx-auto flex w-full max-w-[min(100%,42rem)] flex-col items-center px-4 pb-[max(4rem,env(safe-area-inset-bottom,0px))] pt-10 text-center sm:max-w-2xl sm:px-6 sm:pb-16 sm:pt-12 md:max-w-3xl md:pb-20 md:pt-16 lg:max-w-3xl lg:px-8 lg:pb-24 lg:pt-20">
+        <div className="flex w-full min-w-0 flex-col items-center">
           <BrandLogo variant="hero" />
-          <div className="mt-4 flex w-full max-w-[22rem] flex-col items-center sm:mt-5 sm:max-w-xl md:mt-6 md:max-w-2xl">
-            <h1 className="font-serif text-[1.75rem] font-semibold leading-snug tracking-tight text-[#2F4F6F] sm:text-3xl md:text-4xl lg:text-[2.65rem] lg:leading-[1.2]">
+          <div className="mt-4 flex w-full max-w-[min(100%,22rem)] flex-col items-center sm:mt-5 sm:max-w-xl md:mt-6 md:max-w-2xl">
+            <h1 className="text-balance font-serif text-[clamp(1.5rem,1.1rem+2vw,2.65rem)] font-semibold leading-snug tracking-tight text-[#2F4F6F] sm:text-3xl md:text-4xl lg:leading-[1.2]">
               Conectando profesionales con la comunidad
             </h1>
-            <p className="mt-5 max-w-md text-[0.95rem] leading-relaxed text-neutral-500 md:mt-6 md:text-base">
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-neutral-500 sm:text-[0.95rem] md:mt-6 md:text-base">
               Encontrá servicios de confianza dentro de nuestra comunidad
             </p>
           </div>
@@ -96,24 +96,24 @@ export default function HomePage() {
         <div className="mt-10 flex w-full max-w-sm flex-col gap-4 sm:mt-12 sm:max-w-none sm:flex-row sm:justify-center sm:gap-5">
           <Link
             to="/services"
-            className="inline-flex min-h-[3.25rem] w-full min-w-0 flex-1 items-center justify-center rounded-full bg-[#547295] px-8 text-[0.95rem] font-semibold text-white shadow-[0_12px_36px_-26px_rgba(30,55,80,0.45)] transition duration-200 hover:bg-[#486480] sm:w-auto sm:min-w-[12rem]"
+            className="inline-flex min-h-[3rem] w-full min-w-0 flex-1 items-center justify-center rounded-full bg-[#547295] px-6 text-sm font-semibold text-white shadow-[0_12px_36px_-26px_rgba(30,55,80,0.45)] transition duration-200 hover:bg-[#486480] sm:min-h-[3.25rem] sm:px-8 sm:text-[0.95rem] sm:w-auto sm:min-w-[12rem]"
           >
             Buscar profesionales
           </Link>
           <Link
             to="/create"
-            className="inline-flex min-h-[3.25rem] w-full min-w-0 flex-1 items-center justify-center rounded-full border border-neutral-300/90 bg-[#F5F2ED] px-8 text-[0.95rem] font-semibold text-[#2F4F6F] transition duration-200 hover:border-neutral-400/90 hover:bg-[#ebe7e0] sm:w-auto sm:min-w-[12rem]"
+            className="inline-flex min-h-[3rem] w-full min-w-0 flex-1 items-center justify-center rounded-full border border-neutral-300/90 bg-[#F7F5F2] px-6 text-sm font-semibold text-[#2F4F6F] transition duration-200 hover:border-neutral-400/90 hover:bg-[#ebe7e0] sm:min-h-[3.25rem] sm:px-8 sm:text-[0.95rem] sm:w-auto sm:min-w-[12rem]"
           >
             Publicar servicio
           </Link>
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 pb-20 pt-4 sm:px-6 md:pb-24 lg:px-8 lg:pb-28">
-        <h2 className="text-center font-serif text-2xl font-semibold tracking-tight text-[#2F4F6F] md:text-3xl">
+      <div className="mx-auto w-full min-w-0 max-w-5xl px-4 pb-[max(5rem,env(safe-area-inset-bottom,0px))] pt-4 sm:px-6 md:pb-24 lg:px-8 lg:pb-28">
+        <h2 className="text-center font-serif text-xl font-semibold tracking-tight text-[#2F4F6F] sm:text-2xl md:text-3xl">
           Algunos servicios
         </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-center text-base leading-relaxed text-neutral-500">
+        <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-neutral-500 sm:text-base md:text-[1.05rem]">
           {useCloud
             ? 'Los últimos servicios publicados en la comunidad.'
             : 'Ejemplos para visualizar el diseño. Más adelante conectaremos datos reales.'}
@@ -143,7 +143,7 @@ export default function HomePage() {
             {Array.from({ length: HOME_PREVIEW_LIMIT }).map((_, i) => (
               <li key={i}>
                 <article
-                  className="flex h-full animate-pulse flex-col rounded-3xl border border-neutral-200/70 bg-white p-8 shadow-sm"
+                  className="flex h-full animate-pulse flex-col rounded-3xl border border-neutral-200/70 bg-white p-6 shadow-sm sm:p-8"
                   aria-hidden
                 >
                   <span className="inline-flex h-5 w-20 rounded-full bg-neutral-200/90" />
@@ -167,15 +167,15 @@ export default function HomePage() {
           <ul className="mt-12 grid gap-7 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3">
             {listItems.map((item) => (
               <li key={item.id}>
-                <article className="flex h-full flex-col rounded-3xl border border-neutral-200/70 bg-white p-8 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
-                  <span className="inline-flex w-fit rounded-full bg-[#2F4F6F]/[0.09] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#2F4F6F]">
+                <article className="flex h-full flex-col rounded-3xl border border-neutral-200/70 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md sm:p-8">
+                  <span className="inline-flex w-fit rounded-full bg-[#2F4F6F]/[0.09] px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-[#2F4F6F] sm:text-xs">
                     {item.badge}
                   </span>
                   <div className="mt-5 h-px w-12 rounded-full bg-[#2F4F6F]/20" aria-hidden />
-                  <h3 className="mt-5 font-serif text-xl font-semibold tracking-tight text-[#2F4F6F]">
+                  <h3 className="mt-5 font-serif text-lg font-semibold tracking-tight text-[#2F4F6F] sm:text-xl">
                     {item.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-neutral-600">{item.blurb}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-neutral-600 sm:text-[0.95rem]">{item.blurb}</p>
                 </article>
               </li>
             ))}

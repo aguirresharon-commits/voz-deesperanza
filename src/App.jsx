@@ -11,7 +11,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-[#F5F2ED] font-sans text-[#2F4F6F] antialiased">
+        <div className="min-h-screen w-full min-w-0 overflow-x-clip bg-[#F7F5F2] font-sans text-[#2F4F6F] antialiased">
           <Navbar />
           <Routes>
             <Route path="/" element={<HomePage />} />

@@ -1,13 +1,16 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
   limit,
   orderBy,
   query,
+  setDoc,
   serverTimestamp,
+  updateDoc,
   where,
 } from 'firebase/firestore'
 import { auth, db } from './config.js'
@@ -101,6 +104,7 @@ export async function getServiceById(id) {
  */
 export async function createService(payload) {
   if (!db) throw new Error('Firebase no está configurado')
+  if (!auth?.currentUser?.uid) throw new Error('Usuario no autenticado')
   const docData = {
     name: payload.name,
     profession: payload.profession,
@@ -177,4 +181,99 @@ export async function uploadImage(file, options = {}) {
   } finally {
     if (timer) clearTimeout(timer)
   }
+}
+
+/**
+ * Perfil de usuario (colección `users`): bio?, updatedAt?
+ * @param {string} userId
+ * @returns {Promise<{ id: string, bio: string | null } | null>}
+ */
+export async function getUserProfile(userId) {
+  if (!db) throw new Error('Firebase no está configurado')
+  const uid = String(userId || '').trim()
+  if (!uid) throw new Error('userId inválido')
+  const snap = await getDoc(doc(db, 'users', uid))
+  if (!snap.exists()) return null
+  const data = snap.data() ?? {}
+  const bioRaw = typeof data.bio === 'string' ? data.bio : null
+  const bio = bioRaw ? bioRaw.trim() : null
+  return { id: snap.id, bio }
+}
+
+/**
+ * Guarda la bio del usuario en `users/{uid}`.
+ * @param {{ userId: string, bio: string }} payload
+ */
+export async function updateUserBio(payload) {
+  if (!db) throw new Error('Firebase no está configurado')
+  const uid = String(payload?.userId || '').trim()
+  if (!uid) throw new Error('userId inválido')
+  if (!auth?.currentUser?.uid) throw new Error('Usuario no autenticado')
+  const bio = typeof payload?.bio === 'string' ? payload.bio.trim() : ''
+  await setDoc(
+    doc(db, 'users', uid),
+    {
+      bio,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  )
+}
+
+function mapReviewDoc(docSnap) {
+  const data = docSnap.data() ?? {}
+  return {
+    id: docSnap.id,
+    targetUserId: data.targetUserId ?? null,
+    authorId: data.authorId ?? null,
+    authorName: data.authorName ?? null,
+    rating: typeof data.rating === 'number' ? data.rating : null,
+    text: typeof data.text === 'string' ? data.text : '',
+    createdAt: data.createdAt ?? null,
+    updatedAt: data.updatedAt ?? null,
+  }
+}
+
+/**
+ * Reseñas recibidas por un usuario (requiere índice targetUserId + createdAt en Firestore).
+ * Colección `reviews`: targetUserId, authorId, authorName?, rating, text, createdAt, updatedAt?
+ * @param {string} targetUserId
+ */
+export async function getReviewsForUser(targetUserId) {
+  if (!db) throw new Error('Firebase no está configurado')
+  const uid = String(targetUserId || '').trim()
+  if (!uid) throw new Error('userId inválido')
+  const q = query(collection(db, 'reviews'), where('targetUserId', '==', uid), orderBy('createdAt', 'desc'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(mapReviewDoc)
+}
+
+/**
+ * Actualiza una reseña existente.
+ * Nota: la autorización real debe estar en Firestore Rules; acá validamos para UX.
+ * @param {{ reviewId: string, text: string, rating: number }} payload
+ */
+export async function updateReview(payload) {
+  if (!db) throw new Error('Firebase no está configurado')
+  if (!auth?.currentUser?.uid) throw new Error('Usuario no autenticado')
+  const reviewId = String(payload?.reviewId || '').trim()
+  if (!reviewId) throw new Error('reviewId inválido')
+  const text = typeof payload?.text === 'string' ? payload.text.trim() : ''
+  const rating = typeof payload?.rating === 'number' ? payload.rating : null
+  if (!text) throw new Error('Texto vacío')
+  if (!rating || Number.isNaN(rating)) throw new Error('Rating inválido')
+  await updateDoc(doc(db, 'reviews', reviewId), { text, rating, updatedAt: serverTimestamp() })
+}
+
+/**
+ * Elimina una reseña.
+ * Nota: la autorización real debe estar en Firestore Rules; acá validamos para UX en UI.
+ * @param {string} reviewId
+ */
+export async function deleteReview(reviewId) {
+  if (!db) throw new Error('Firebase no está configurado')
+  if (!auth?.currentUser?.uid) throw new Error('Usuario no autenticado')
+  const id = String(reviewId || '').trim()
+  if (!id) throw new Error('reviewId inválido')
+  await deleteDoc(doc(db, 'reviews', id))
 }

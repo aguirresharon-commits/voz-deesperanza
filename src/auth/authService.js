@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, signInWithPopup, signOut, updateProfile } from 'firebase/auth'
+import { GoogleAuthProvider, signInWithRedirect, signOut, updateProfile } from 'firebase/auth'
 import { uploadImage } from '../firebase/services.js'
 import { auth } from '../firebase/config.js'
 
@@ -14,7 +14,8 @@ export async function loginWithGoogle() {
     throw new Error('Auth no configurado')
   }
   try {
-    await signInWithPopup(auth, googleProvider)
+    // Redirect evita problemas de COOP/ventanas emergentes en algunos navegadores/configuraciones.
+    await signInWithRedirect(auth, googleProvider)
   } catch (err) {
     console.error('[Voz de Esperanza][Auth] Error al iniciar sesión con Google:', err)
     throw err

@@ -68,7 +68,7 @@ export default function ServiceDetail() {
 
   if (loadError) {
     return (
-      <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6 md:py-16 lg:px-8 lg:py-20">
+      <main className="mx-auto w-full min-w-0 max-w-5xl px-4 py-14 sm:px-6 md:py-16 lg:px-8 lg:py-20">
         <div
           className="rounded-2xl border border-red-200/90 bg-red-50/95 px-6 py-6 text-red-950 shadow-sm"
           role="alert"
@@ -97,7 +97,7 @@ export default function ServiceDetail() {
 
   if (!service) {
     return (
-      <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6 md:py-16 lg:px-8 lg:py-20">
+      <main className="mx-auto w-full min-w-0 max-w-5xl px-4 py-14 sm:px-6 md:py-16 lg:px-8 lg:py-20">
         <p className="text-lg text-neutral-700">No encontramos este servicio.</p>
         <Link
           to="/services"
@@ -113,7 +113,7 @@ export default function ServiceDetail() {
   const waLinkInvalid = waHref === '#'
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-20">
+    <main className="mx-auto w-full min-w-0 max-w-5xl px-4 py-10 sm:px-6 sm:py-12 md:py-16 lg:px-8 lg:py-20">
       <Link
         to="/services"
         className="inline-flex text-sm font-semibold text-neutral-500 transition duration-200 hover:text-[#2F4F6F]"
@@ -136,8 +136,8 @@ export default function ServiceDetail() {
           )}
         </div>
 
-        <div className="p-7 md:p-10">
-          <h1 className="font-serif text-3xl font-semibold tracking-tight text-[#2F4F6F] md:text-4xl">
+        <div className="p-5 sm:p-7 md:p-10">
+          <h1 className="font-serif text-2xl font-semibold tracking-tight text-[#2F4F6F] sm:text-3xl md:text-4xl">
             {service.name}
           </h1>
           <span className="mt-4 inline-flex w-fit rounded-full bg-[#2F4F6F]/[0.09] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#2F4F6F]">
@@ -149,7 +149,7 @@ export default function ServiceDetail() {
               <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
                 Sobre el servicio
               </h2>
-              <p className="mt-3 leading-relaxed text-base">{service.description}</p>
+              <p className="mt-3 text-sm leading-relaxed sm:text-base">{service.description}</p>
             </div>
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
