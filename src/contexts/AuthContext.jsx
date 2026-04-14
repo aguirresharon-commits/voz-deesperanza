@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
+import { getRedirectResult, onAuthStateChanged } from 'firebase/auth'
 import * as authService from '../auth/authService.js'
 import { auth } from '../firebase/config.js'
 
@@ -14,6 +14,12 @@ export function AuthProvider({ children }) {
       setLoading(false)
       return undefined
     }
+
+    // Completa el flujo de signInWithRedirect al volver de Google.
+    // Si falla (p.ej. auth/unauthorized-domain), lo dejamos en consola para debugging.
+    getRedirectResult(auth).catch((err) => {
+      console.error('[Voz de Esperanza][Auth] Redirect result error:', err)
+    })
 
     const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
       if (!fbUser) {

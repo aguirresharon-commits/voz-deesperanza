@@ -68,6 +68,7 @@ export default function ProfilePage() {
   const avatarInputRef = useRef(null)
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [avatarError, setAvatarError] = useState(null)
+  const [avatarLoadError, setAvatarLoadError] = useState(false)
   const [bio, setBio] = useState(null)
   const [bioLoading, setBioLoading] = useState(false)
   const [bioError, setBioError] = useState(null)
@@ -463,6 +464,7 @@ export default function ProfilePage() {
                     e.target.value = ''
                     if (!file) return
                     setAvatarError(null)
+                    setAvatarLoadError(false)
                     setAvatarUploading(true)
                     try {
                       await updateUserProfilePhoto(file)
@@ -475,11 +477,13 @@ export default function ProfilePage() {
                     }
                   }}
                 />
-                {user.photoURL ? (
+                {user.photoURL && !avatarLoadError ? (
                   <img
                     src={user.photoURL}
                     alt={`Foto de perfil de ${displayName}`}
                     className="h-36 w-36 rounded-full border border-neutral-200/80 object-cover shadow-sm"
+                    referrerPolicy="no-referrer"
+                    onError={() => setAvatarLoadError(true)}
                   />
                 ) : (
                   <div
@@ -522,7 +526,7 @@ export default function ProfilePage() {
                 {!bioEditing ? (
                   <button
                     type="button"
-                    disabled={!useCloud || bioLoading || bioSaving}
+                    disabled={bioSaving}
                     className="inline-flex min-h-[2.5rem] items-center justify-center rounded-2xl border border-neutral-200/90 bg-white px-4 text-sm font-semibold text-[#2F4F6F] shadow-sm transition duration-200 hover:bg-[#F7F5F2]/80 disabled:cursor-not-allowed disabled:opacity-60"
                     onClick={() => {
                       setBioSaved(false)

@@ -261,8 +261,16 @@ export default function Navbar() {
                     try {
                       await loginWithGoogle()
                       setDrawerOpen(false)
-                    } catch {
-                      setLoginError('No se pudo iniciar sesión. Intentá de nuevo.')
+                    } catch (err) {
+                      const code =
+                        err && typeof err === 'object' && 'code' in err && typeof err.code === 'string'
+                          ? err.code
+                          : ''
+                      if (code) {
+                        setLoginError(`No se pudo iniciar sesión (${code}).`)
+                      } else {
+                        setLoginError('No se pudo iniciar sesión. Intentá de nuevo.')
+                      }
                     }
                   }}
                 >
